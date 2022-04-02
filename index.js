@@ -3,6 +3,71 @@ const {Client} = require('discord.js');
 const Discord = require('discord.js');
 const fs = require('fs')
 const https = require('https')
+const WebSocket = require('ws')
+
+const ip = 'placenl.noahvdaa.me'
+const reconnect_time = 5
+
+
+// Websocket connect
+function connect() {
+	const ws = new WebSocket(`wss://${ip}/api/ws`, {
+		headers: {
+			Origin: ip,
+			'User-Agent': 'DISCORD_BOT',
+		}
+	})
+
+	ws.on('open', function () {
+		template_channel = bot.channels.cache.get('959940846587887636');
+
+
+		console.log('Connected.')
+		setInterval(()=>{
+			ws.send(JSON.stringify({
+				type: 'ping' 
+			}))
+		}, 10000)
+
+	})
+
+	ws.on('close', function () {
+		console.log(`Lost connection, reconnecting in ${reconnect_time} second(s).`)
+		setTimeout(function () {
+			connect();
+		}, reconnect_time * 1000);
+	})
+
+	ws.on('message', function (d) {
+		try {
+			var json = JSON.parse(String(d));
+			if (json.type == 'map') {
+				console.log(json)
+				// {"type":"map","data":"1648937116990.png","reason":"Tijdelijk geen master chief"}
+				const EmbeddedMessage = new MessageEmbed()
+				.setThumbnail(`https://placenl.noahvdaa.me/maps/${json.data}`)
+				.setColor(settings.color)
+				.setTitle(`Reden: ${json.reason}`)
+				.setDescription(`[Link of image](https://placenl.noahvdaa.me/maps/${json.data})`)
+				.setTimestamp()
+				.setFooter({text: 'Template made by github.com/picocode1'});
+					
+				template_channel.send({ 
+					embeds: [EmbeddedMessage] 
+				});
+				return
+			}
+		} catch (error) {
+			console.err(error)
+		}
+	})
+
+	ws.on('error', function (e) {
+		console.err(e)
+	})
+}
+
+
 
 //Getting prefix, token from settings.json
 const settings = require('./settings.json');
@@ -50,6 +115,11 @@ fs.readdir('./commands/', (error, files) => {
 
 //Command Manager
 bot.on('messageCreate', async message => {
+	if (message.channelId == "959328150427435023"){
+		message.react('✅');
+		message.react('❌');
+	}
+
 	if (!message.content.startsWith(settings.prefix) || message.author.bot) return;
 
 	const args = message.content.slice(prefix.length).trim().split(' ');
@@ -62,35 +132,47 @@ bot.on('messageCreate', async message => {
 	let commandfile = bot.commands.get(command);
 	
 	if (commandfile) {
-		console.log(`Running command: ${command}, in channel: ${message.channel.name}`);
+		console.log(`Running command: ${command}, in channel: ${message.channel.name} message: ${message}`);
 		commandfile.run(Discord, command, args, message.channel, message);
 	}
 });
 
+process.on('uncaughtException', function (exception) {
+	console.err(exception);
+});
+
+
 bot.on('ready', async (message) => {
 	console.log(`Logged in as ${bot.user.tag} current prefix: ${settings.prefix}`);
 
-	setInterval(() => {
-		https.get(options, (res) => {
-			let data = '';
+ 	//Connect with websocket
+ 	connect()
 
-			res.on('data', (chunk) => {
-				data += chunk;
+	setInterval(() => {
+		try {
+			https.get(options, (res) => {
+				let data = '';
+	
+				res.on('data', (chunk) => {
+					data += chunk;
+				});
+	
+				res.on('end', () => {
+					var json = JSON.parse(data)
+					bot.user.setPresence({		
+						activities: [{
+							name: `${json.connectionCount} gebruikers`,
+							type: "WATCHING" // PLAYING STREAMING LISTENING WATCHING COMPETING
+						}],
+						status: 'online'
+					})
+				});
+			}).on('error', (err) => {
+				console.log("Error: " + err.message);
 			});
-			
-			res.on('end', () => {
-				var json = JSON.parse(data)
-				bot.user.setPresence({		
-					activities: [{
-						name: `${json.connectionCount} gebruikers`,
-						type: "WATCHING" // PLAYING STREAMING LISTENING WATCHING COMPETING
-					}],
-					status: 'online'
-				})
-			});
-		}).on('error', (err) => {
-			console.log("Error: " + err.message);
-		});
+		} catch (error) {
+			console.err(error)
+		}
 	}, 6000) // Every 6 seconds update discord status
 });
 
