@@ -1,5 +1,5 @@
 //Requirements
-const {Client} = require('discord.js');
+const {Client, MessageEmbed} = require('discord.js');
 const Discord = require('discord.js');
 const fs = require('fs')
 const https = require('https')
@@ -19,9 +19,6 @@ function connect() {
 	})
 
 	ws.on('open', function () {
-		template_channel = bot.channels.cache.get('959940846587887636');
-
-
 		console.log('Connected.')
 		setInterval(()=>{
 			ws.send(JSON.stringify({
@@ -42,6 +39,8 @@ function connect() {
 		try {
 			var json = JSON.parse(String(d));
 			if (json.type == 'map') {
+				var template_channel = bot.channels.cache.get('959940846587887636');
+
 				console.log(json)
 				// {"type":"map","data":"1648937116990.png","reason":"Tijdelijk geen master chief"}
 				const EmbeddedMessage = new MessageEmbed()
