@@ -62,6 +62,7 @@ bot.on('messageCreate', async message => {
 	let commandfile = bot.commands.get(command);
 	
 	if (commandfile) {
+		console.log(`Running command: ${command}, in channel: ${message.channel.name}`);
 		commandfile.run(Discord, command, args, message.channel, message);
 	}
 });
@@ -70,24 +71,26 @@ bot.on('ready', async (message) => {
 	console.log(`Logged in as ${bot.user.tag} current prefix: ${settings.prefix}`);
 
 	setInterval(() => {
-		const request = https.request(options, response => {
-			response.on('data', d => {
-				var data = JSON.parse(String(d))
+		https.get(options, (res) => {
+			let data = '';
 
+			res.on('data', (chunk) => {
+				data += chunk;
+			});
+			
+			res.on('end', () => {
+				var json = JSON.parse(data)
 				bot.user.setPresence({		
 					activities: [{
-						name: `${data.connectionCount} gebruikers`,
+						name: `${json.connectionCount} gebruikers`,
 						type: "WATCHING" // PLAYING STREAMING LISTENING WATCHING COMPETING
 					}],
 					status: 'online'
 				})
-			})
-		})
-		
-		request.on('error', error => {
-			console.error(error)
-		})
-		request.end()
+			});
+		}).on('error', (err) => {
+			console.log("Error: " + err.message);
+		});
 	}, 6000) // Every 6 seconds update discord status
 });
 
