@@ -1,0 +1,15 @@
+{
+  "name": "placenl",
+  "version": "1.0.0",
+  "description": "Discord bot for PlaceML",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PlaceNL/"
+  },
+  "author": "picocode",
+  "license": "ISC"
+}
