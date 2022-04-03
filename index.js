@@ -44,7 +44,7 @@ function connect() {
 				console.log(json)
 				// {"type":"map","data":"1648937116990.png","reason":"Tijdelijk geen master chief"}
 				const EmbeddedMessage = new MessageEmbed()
-				.setThumbnail(`https://placenl.noahvdaa.me/maps/${json.data}`)
+				.setImage(`https://placenl.noahvdaa.me/maps/${json.data}`)
 				.setColor(settings.color)
 				.setTitle(`Reden: ${json.reason}`)
 				.setDescription(`[Link of image](https://placenl.noahvdaa.me/maps/${json.data})`)
