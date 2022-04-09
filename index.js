@@ -2,6 +2,8 @@
 const {Client, MessageEmbed} = require('discord.js');
 const Discord = require('discord.js');
 const fs = require('fs')
+
+/*
 const https = require('https')
 const WebSocket = require('ws')
 
@@ -65,7 +67,7 @@ function connect() {
 		console.err(e)
 	})
 }
-
+*/
 
 
 //Getting prefix, token from settings.json
@@ -141,10 +143,42 @@ process.on('uncaughtException', function (exception) {
 });
 
 
+bot.on('guildMemberRemove', message => {
+	bot.user.setPresence({		
+		activities: [{
+			name: `${message.guild.memberCount} gebruikers`,
+			type: "WATCHING" // PLAYING STREAMING LISTENING WATCHING COMPETING
+		}],
+		status: 'online'
+	})
+});
+  
+  
+bot.on('guildMemberAdd', (message, member) => {
+	bot.user.setPresence({		
+		activities: [{
+			name: `${message.guild.memberCount} gebruikers`,
+			type: "WATCHING" // PLAYING STREAMING LISTENING WATCHING COMPETING
+		}],
+		status: 'online'
+	})
+});
+
+
 bot.on('ready', async (message) => {
 	console.log(`Logged in as ${bot.user.tag} current prefix: ${settings.prefix}`);
+	var server = bot.guilds.cache.reduce((_, guild) => _ + guild.memberCount, 0)
+	bot.user.setPresence({		
+		activities: [{
+			name: `${server} gebruikers`,
+			type: "WATCHING" // PLAYING STREAMING LISTENING WATCHING COMPETING
+		}],
+		status: 'online'
+	})
+
 
  	//Connect with websocket
+	/*
  	connect()
 
 	setInterval(() => {
@@ -173,6 +207,6 @@ bot.on('ready', async (message) => {
 			console.err(error)
 		}
 	}, 6000) // Every 6 seconds update discord status
+	*/
 });
-
 bot.login(settings.token);
