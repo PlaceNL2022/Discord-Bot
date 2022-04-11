@@ -1,6 +1,9 @@
-const modRoleId = '958751634089967727'
+const {MessageActionRow, MessageButton} = require('discord.js');
 
 const settings = require("../settings.json");
+
+const modRoleId = settings.modRoleId;
+
 module.exports.run = async (Discord, command, args, channel, message) => {
     if (message.guild == null) {
         return;
@@ -14,20 +17,20 @@ module.exports.run = async (Discord, command, args, channel, message) => {
         return message.channel.send(`You didn't provide any arguments, ${message.author}!`);
     }
 
-    const role = await message.guid.roles.fetch(args[0]);
+    const role = await message.guild.roles.fetch(args[0]);
     if (role == null) {
         return message.reply(`Unknown role with id '${args[0]}'`);
     }
 
 	// //Get rid of prefix and say text by getting length of command and length of prefix
     // var messages = message.content.substring(command.length + settings.prefix.length);
-    iconUrl = role.iconUrl()
+    const iconUrl = role.iconURL()
 
     const row = new MessageActionRow()
         .addComponents(
             new MessageButton()
-                .stCustomId(`role_${role.id}`)
-                .setLabel(`${iconUrl ? `${iconUrl} ` : ''}**${role.name}**`)
+                .setCustomId(`role_${role.id}`)
+                .setLabel(`${iconUrl ? `${iconUrl} ` : ''}${role.name}`)
                 .setStyle('PRIMARY'));
 
     message.channel.send({

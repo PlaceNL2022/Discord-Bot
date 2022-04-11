@@ -113,7 +113,7 @@ fs.readdir('./commands/', (error, files) => {
 	});
 });
 
-const suggestionChannels = ["959328150427435023", "962427243693502504"];
+const suggestionChannels = settings.suggestionChannelIds;
 
 //Command Manager
 bot.on('messageCreate', async message => {
@@ -143,7 +143,7 @@ bot.on('messageCreate', async message => {
 bot.on('interactionCreate', async interaction => {
 	if (interaction.isButton()) {
 		if (interaction.customId.startsWith("role_")) {
-			const role_id = interaction.customid.split('_')[1];
+			const role_id = interaction.customId.split('_')[1];
 
 			const role = await interaction.member.roles.cache.get(role_id);
 

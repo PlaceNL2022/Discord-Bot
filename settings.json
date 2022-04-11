@@ -1,5 +1,7 @@
 {
 	"prefix":"-",
 	"token":"TOKEN_HIER",
-	"color":"#FF9B00"
+	"color":"#FF9B00",
+	"suggestionChannelIds": ["959328150427435023", "962427243693502504"],
+	"modRoleId": "813882225488953374"
 }
