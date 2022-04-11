@@ -84,7 +84,6 @@ bot.commands = new Discord.Collection();
 //Setting prefix
 let prefix = settings.prefix;
 
-
 // Request for getting the connection count
 const options = {
 	hostname: 'placenl.noahvdaa.me',
@@ -114,9 +113,12 @@ fs.readdir('./commands/', (error, files) => {
 	});
 });
 
+const suggestionChannels = ["959328150427435023", "962427243693502504"];
+
 //Command Manager
 bot.on('messageCreate', async message => {
-	if (message.channelId == "959328150427435023"){
+	
+	if (suggestionChannels.includes(message.channelId)){
 		message.react('✅');
 		message.react('❌');
 	}
@@ -125,7 +127,7 @@ bot.on('messageCreate', async message => {
 
 	const args = message.content.slice(prefix.length).trim().split(' ');
 	const command = args.shift().toLowerCase();
-	
+
 	if (message.content == prefix) {
 		message.channel.send('Please specify a command.');
 	}
@@ -137,6 +139,31 @@ bot.on('messageCreate', async message => {
 		commandfile.run(Discord, command, args, message.channel, message);
 	}
 });
+
+bot.on('interactionCreate', async interaction => {
+	if (interaction.isButton()) {
+		if (interaction.customId.startsWith("role_")) {
+			const role_id = interaction.customid.split('_')[1];
+
+			const role = await interaction.member.roles.cache.get(role_id);
+
+			if (role) {
+				interaction.reply({ content: "Je hebt deze rol al.", ephemeral: true })
+				return
+			}
+			
+			try {
+				await interaction.member.roles.add(role_id);
+			} catch (error) {
+				await interaction.reply({ content: "Er is iets fout gegaan bij het toevoegen van de rol. Neem contact op met een moderator via MODMAIL.", ephemeral: true })
+				return;
+			}
+
+			await interaction.reply({ content: "Je hebt de rol gekregen! :)", ephemeral: true })
+		}
+	}
+});
+
 
 process.on('uncaughtException', function (exception) {
 	console.err(exception);
