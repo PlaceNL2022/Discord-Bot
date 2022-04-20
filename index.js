@@ -2,6 +2,7 @@
 const {Client, MessageEmbed} = require('discord.js');
 const Discord = require('discord.js');
 const fs = require('fs')
+const Gamedig = require('gamedig');
 
 /*
 const https = require('https')
@@ -192,17 +193,41 @@ bot.on('guildMemberAdd', (message, member) => {
 });
 
 
+
+var switched = false
+
+function Status(name, type, status){
+	bot.user.setPresence({		
+		activities: [{
+			name: name,
+			type: type // PLAYING STREAMING LISTENING WATCHING COMPETING
+		}],
+		status: status
+	})
+}
+
 bot.on('ready', async (message) => {
 	console.log(`Logged in as ${bot.user.tag} current prefix: ${settings.prefix}`);
 	var server = bot.guilds.cache.reduce((_, guild) => _ + guild.memberCount, 0)
-	bot.user.setPresence({		
-		activities: [{
-			name: `${server} gebruikers`,
-			type: "WATCHING" // PLAYING STREAMING LISTENING WATCHING COMPETING
-		}],
-		status: 'online'
-	})
 
+	setInterval(()=> {
+		if (switched) {
+			Gamedig.query({
+				type: 'minecraft',
+				host: 'play.placenl.nl'
+			}).then((state) => {
+				Status(`met ${state.players.length}/${state.maxplayers} spelers`, "PLAYING", "online")
+			}).catch((error) => {
+				Status(`Server is offline`, "WATCHING", "dnd")
+			});
+			switched = false
+		}
+		else 
+		{
+			Status(`${server} gebruikers`, "WATCHING", "online")
+			switched = true
+		}
+	}, 10000) // Update status every 10 seconds
 
  	//Connect with websocket
 	/*
